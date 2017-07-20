@@ -13,12 +13,6 @@ defmodule TenThousandUsers.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", TenThousandUsers do
-    pipe_through :api
-
-    resources "/users", UserController
-  end
-
   scope "/", TenThousandUsers do
     pipe_through :browser # Use the default browser stack
 
