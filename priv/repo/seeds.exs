@@ -1,11 +1,10 @@
 # Script for populating the database. You can run it as:
 #
 #     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     TenThousandUsers.Repo.insert!(%TenThousandUsers.SomeModel{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+
+1..1000 |> Enum.each(fn (i)->
+  TenThousandUsers.Repo.insert!(%TenThousandUsers.User{
+    email: "useremail#{i}@example.com",
+    username: "username#{i}"
+  })
+end)
