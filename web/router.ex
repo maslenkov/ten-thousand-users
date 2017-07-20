@@ -19,6 +19,12 @@ defmodule TenThousandUsers.Router do
     get "/", PageController, :index
   end
 
+  scope "/api", TenThousandUsers do
+    pipe_through :api
+
+    resources "/users", UserController, except: [:new, :edit]
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", TenThousandUsers do
   #   pipe_through :api
