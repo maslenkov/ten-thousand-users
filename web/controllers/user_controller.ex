@@ -4,38 +4,30 @@ defmodule TenThousandUsers.UserController do
   alias TenThousandUsers.User
 
   def index(conn, _params) do
-    users = Repo.all(User)
-
-    json conn, %{users: users}
-  end
-
-  def new(conn, _params) do
-    changeset = User.changeset(%User{})
-    render(conn, "new.html", changeset: changeset)
+    users = Repo.all(from u in User,
+      select: %{id: u.id, username: u.username, email: u.email})
+    render(conn, "index.json", users: users)
   end
 
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
 
     case Repo.insert(changeset) do
-      {:ok, _user} ->
+      {:ok, user} ->
         conn
-        |> put_flash(:info, "User created successfully.")
-        |> redirect(to: user_path(conn, :index))
+        |> put_status(:created)
+        |> put_resp_header("location", user_path(conn, :show, user))
+        |> render("show.json", user: user)
       {:error, changeset} ->
-        render(conn, "new.html", changeset: changeset)
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(TenThousandUsers.ChangesetView, "error.json", changeset: changeset)
     end
   end
 
   def show(conn, %{"id" => id}) do
     user = Repo.get!(User, id)
-    render(conn, "show.html", user: user)
-  end
-
-  def edit(conn, %{"id" => id}) do
-    user = Repo.get!(User, id)
-    changeset = User.changeset(user)
-    render(conn, "edit.html", user: user, changeset: changeset)
+    render(conn, "show.json", user: user)
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
@@ -44,11 +36,11 @@ defmodule TenThousandUsers.UserController do
 
     case Repo.update(changeset) do
       {:ok, user} ->
-        conn
-        |> put_flash(:info, "User updated successfully.")
-        |> redirect(to: user_path(conn, :show, user))
+        render(conn, "show.json", user: user)
       {:error, changeset} ->
-        render(conn, "edit.html", user: user, changeset: changeset)
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(TenThousandUsers.ChangesetView, "error.json", changeset: changeset)
     end
   end
 
@@ -59,8 +51,6 @@ defmodule TenThousandUsers.UserController do
     # it to always work (and if it does not, it will raise).
     Repo.delete!(user)
 
-    conn
-    |> put_flash(:info, "User deleted successfully.")
-    |> redirect(to: user_path(conn, :index))
+    send_resp(conn, :no_content, "")
   end
 end
