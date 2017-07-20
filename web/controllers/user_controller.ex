@@ -5,8 +5,8 @@ defmodule TenThousandUsers.UserController do
 
   def index(conn, _params) do
     users = Repo.all(User)
-    # render(conn, "index.html", users: users)
-    json conn, users
+
+    json conn, %{users: users}
   end
 
   def new(conn, _params) do
